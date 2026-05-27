@@ -16,9 +16,19 @@
 
     mkCompile = args: pkgs.callPackage ./default.nix (args // { inherit pkgs stdenv version; });
     compile = mkCompile {};
+
+    shell = pkgs.symlinkJoin {
+      name = "compiler-shell";
+      paths = [
+        compile
+        pkgs.gdb
+        pkgs.llvmPackages_20.lldb
+        pkgs.toolchain.clang_musl_libcxx
+      ];
+    };
   in
   {
-    packages.${system} = { default = compile; inherit compile; };
+    packages.${system} = { default = shell; inherit compile shell; };
 
     apps.${system} = {
       default = { type = "app"; program = "${compile}/bin/compile"; };
