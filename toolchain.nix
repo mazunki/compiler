@@ -1,3 +1,8 @@
+# this clang+musl toolchain is derived from IncludeOS' overlay to produce
+# static and reproducible builds suitable for unikernels
+#
+# see https://github.com/includeos/IncludeOS/blob/main/overlay.nix
+# works well together with linux-runner too
 { }:
 final: prev:
 let
