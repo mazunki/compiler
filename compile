@@ -53,7 +53,8 @@ def main():
     parser = argparse.ArgumentParser(prog="compile")
     parser.add_argument("sources", nargs="*", type=Path, default=[Path(".")])
     parser.add_argument("--compiler")
-    parser.add_argument("--cflags")
+    parser.add_argument("--cflags", metavar="FLAGS",
+                        help="extra compiler flags; use = to assign (e.g. --cflags='-std=c++23 -O3')")
     parser.add_argument("--no-static", dest="static", action="store_false", default=True)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--debug", action="store_true")
