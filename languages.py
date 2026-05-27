@@ -127,11 +127,12 @@ class Zig(Language):
 
     @property
     def static_flags(self):
-        return []
+        return ["-target", "x86_64-linux-musl"]
 
     def build_static(self, sources, out):
         cmd = Command(list(self.compiler))
         cmd += sources
+        cmd += self.static_flags
         cmd += self.debug_flags
         cmd += f"-femit-bin={out}"
         return cmd
