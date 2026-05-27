@@ -18,7 +18,7 @@ def _color_path(p: Path) -> str:
 def _as_path(value: str | Path) -> str | Path:
     if isinstance(value, Path):
         return value
-    if "/" in value:
+    if value.startswith("/"):
         return Path(value)
     return value
 
