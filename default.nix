@@ -19,7 +19,8 @@ pkgs.stdenv.mkDerivation {
       --subst-var-by CC     "${stdenv.cc}/bin/cc" \
       --subst-var-by CXX    "${stdenv.cc}/bin/c++" \
       --subst-var-by CFLAGS "${cflags}" \
-      --subst-var-by LIBCXX "${pkgs.toolchain.libcxx_musl}/lib"
+      --subst-var-by LIBCXX    "${pkgs.toolchain.libcxx_musl}/lib" \
+      --subst-var-by LIBUNWIND "${pkgs.toolchain.libraries.libunwind}/lib"
 
     install -D compile $out/bin/compile
     substituteInPlace $out/bin/compile \

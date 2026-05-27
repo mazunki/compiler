@@ -86,7 +86,8 @@ class C(Language):
 class Cpp(Language):
     extensions:  frozenset[str] = dataclasses.field(default=frozenset({".cpp", ".cc", ".cxx"}))
     compiler:    Args           = dataclasses.field(default_factory=lambda: ["c++"])
-    libcxx_path: Optional[str]  = dataclasses.field(default_factory=lambda: _nix_or("@LIBCXX@", None))
+    libcxx_path:   Optional[str] = dataclasses.field(default_factory=lambda: _nix_or("@LIBCXX@",   None))
+    libunwind_path: Optional[str] = dataclasses.field(default_factory=lambda: _nix_or("@LIBUNWIND@", None))
 
     @property
     def debug_flags(self):
@@ -94,11 +95,14 @@ class Cpp(Language):
 
     @property
     def static_flags(self):
-        return ["-static", "-rtlib=compiler-rt", f"-L{self.libcxx_path}"]
+        flags = ["-static", "-rtlib=compiler-rt", "--unwindlib=libunwind", f"-L{self.libcxx_path}"]
+        if self.libunwind_path:
+            flags += [f"-L{self.libunwind_path}"]
+        return flags
 
     def build_static(self, sources, out):
-        if self.libcxx_path is None:
-            raise RuntimeError("C++ static linking requires libcxx_path; set @LIBCXX@ or pass --no-static")
+        if self.libcxx_path is None or self.libunwind_path is None:
+            raise RuntimeError("C++ static linking requires @LIBCXX@ and @LIBUNWIND@; pass --no-static to disable")
         cmd = Command(list(self.compiler))
         cmd += self.cflags
         cmd += self.static_flags
