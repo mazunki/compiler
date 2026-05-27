@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+import argparse
+import sys
+from pathlib import Path
+from typing import Optional
+
+from command import Args
+from languages import Language, LANGUAGES
+
+def expand_sources(paths: list[Path]) -> list[Path]:
+    all_extensions = frozenset().union(*(lang.extensions for lang in LANGUAGES))
+    sources = []
+    for p in paths:
+        if p.is_dir():
+            sources.extend(f for f in sorted(p.iterdir()) if f.suffix in all_extensions)
+        else:
+            sources.append(p)
+    return sources
+
+
+def detect_lang(sources: list[Path]) -> Language:
+    for lang in LANGUAGES:
+        if any(s.suffix in lang.extensions for s in sources):
+            return lang
+    raise RuntimeError("couldn't recognize the language :(")
+
+
+def compile(
+    sources: list[Path],
+    out: Path,
+    compiler: Optional[Args] = None,
+    cflags: Optional[Args] = None,
+    static: bool = True,
+    debug: bool = False,
+    verbose: Optional[str] = None,
+) -> Path:
+    lang = detect_lang(sources)
+    sources = [s for s in sources if s.suffix in lang.extensions]
+
+    if compiler is not None:
+        lang = lang.with_compiler(compiler)
+    if cflags is not None:
+        lang = lang.with_cflags(cflags)
+    if debug:
+        lang = lang.with_debug()
+
+    cmd = lang.build_static(sources, out) if static else lang.build_dynamic(sources, out)
+    cmd.run(verbose=verbose)
+    return out
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="compile")
+    parser.add_argument("sources", nargs="*", type=Path, default=[Path(".")])
+    parser.add_argument("--compiler")
+    parser.add_argument("--cflags")
+    parser.add_argument("--no-static", dest="static", action="store_false", default=True)
+    parser.add_argument("--out", type=Path)
+    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("-v", "--verbose", nargs="?", const="multiline", default=None,
+                        metavar="MODE", help="multiline (default) or oneline")
+    args = parser.parse_args()
+
+    out = compile(
+        sources=expand_sources(args.sources),
+        out=args.out or Path("a.out"),
+        compiler=args.compiler.split() if args.compiler else None,
+        cflags=args.cflags.split() if args.cflags else None,
+        static=args.static,
+        debug=args.debug,
+        verbose=args.verbose,
+    )
+    print(out)
+
+
+if __name__ == "__main__":
+    main()
+
