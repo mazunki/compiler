@@ -65,15 +65,19 @@ def main():
                         metavar="MODE", help="multiline (default) or oneline")
     args = parser.parse_args()
 
-    out = compile(
-        sources=expand_sources(args.sources),
-        out=args.out or Path("a.out"),
-        compiler=args.compiler.split() if args.compiler else None,
-        cflags=args.cflags.split() if args.cflags else None,
-        static=args.static,
-        debug=args.debug,
-        verbose=args.verbose,
-    )
+    try:
+        out = compile(
+            sources=expand_sources(args.sources),
+            out=args.out or Path("a.out"),
+            compiler=args.compiler.split() if args.compiler else None,
+            cflags=args.cflags.split() if args.cflags else None,
+            static=args.static,
+            debug=args.debug,
+            verbose=args.verbose,
+        )
+    except RuntimeError as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
     print(out)
 
 
