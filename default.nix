@@ -2,6 +2,7 @@
 , stdenv
 , cflags ? "-O2"
 , debug ? false
+, version ? "unknown"
 }:
 
 pkgs.stdenv.mkDerivation {
@@ -24,6 +25,7 @@ pkgs.stdenv.mkDerivation {
 
     install -D compile $out/bin/compile
     substituteInPlace $out/bin/compile \
-      --replace-fail "#!/usr/bin/env python3" "#!${pkgs.python3}/bin/python3"
+      --replace-fail "#!/usr/bin/env python3" "#!${pkgs.python3}/bin/python3" \
+      --subst-var-by VERSION "${version}"
   '';
 }

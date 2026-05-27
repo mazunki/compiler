@@ -7,6 +7,8 @@ from typing import Optional
 from command import Args
 from languages import Language, LANGUAGES
 
+VERSION = "@VERSION@"
+
 def expand_sources(paths: list[Path]) -> list[Path]:
     all_extensions = frozenset().union(*(lang.extensions for lang in LANGUAGES))
     sources = []
@@ -51,6 +53,7 @@ def compile(
 
 def main():
     parser = argparse.ArgumentParser(prog="compile")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("sources", nargs="*", type=Path, default=[Path(".")])
     parser.add_argument("--compiler")
     parser.add_argument("--cflags", metavar="FLAGS",

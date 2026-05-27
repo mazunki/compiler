@@ -12,7 +12,9 @@
     };
     stdenv = pkgs.toolchain.stdenv';
 
-    mkCompile = args: pkgs.callPackage ./default.nix (args // { inherit pkgs stdenv; });
+    version = self.dirtyShortRev or "unknown";
+
+    mkCompile = args: pkgs.callPackage ./default.nix (args // { inherit pkgs stdenv version; });
     compile = mkCompile {};
   in
   {
